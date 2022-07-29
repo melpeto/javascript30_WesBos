@@ -61,15 +61,36 @@
 
   <script>
 
-    document.addEventListener('keydown', (e) => {
+    const playSound = (e) => {
+      //select the audio element
       const audio = document.querySelector(`audio[data-key="${e.keyCode}"]`);
       //the square brackets is the attribute selector
-
-      if (!audio) return; //if there is no audio element with a data-key matching the key that was just hit, stop the fn from running altogether
-
-      audio.play();
+      //select the div with a class of key which has the specific data-key attribute of the key we pressed
+      const key = document.querySelector(`.key[data-key="${e.keyCode}"]`);
+      //if there is no audio element with a data-key matching the key that was just hit, stop the fn from running altogether
+      if (!audio) return;
+      //if you hit the key over and over again, it will only play every once and a while. this is because .play() will not play an audio clip that is ALREADY playing. it will wait til its done then play it again. SO we 'rewind' to the start
+      audio.currentTime = 0;
       //when the key is pressed (on keydown), play the audio
-    })
+      audio.play();
+      //on keydown, add the class of .playing
+      key.classList.add('playing');
+    }
+
+    //The class gets added and the yellow border appears bc of the CSS 'transition' but we want this border to go away at some point... add a transition-end event
+
+    //select all divs with class .key
+    const keys = document.querySelectorAll('.key');
+    //listen for the end of the transition. can't put an event listener on ALL keys, need to do each
+    keys.forEach(key => key.addEventListener('transitionend', removeTransition));
+
+    function removeTransition(e) {
+      if (e.propertyName !== 'transform') return; //just skip running this 'removeTransition' fn if it's not a transform - because there are a few CSS property changes on the transition but we don't need to address all of them
+      this.classList.remove('playing');
+    }
+
+    //*****the main function of the whole thing:  listen for the pressing of a key, and run the playSound function which is defined above
+    document.addEventListener('keydown', playSound)
 
   </script>
 
